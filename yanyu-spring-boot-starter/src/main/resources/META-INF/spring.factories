@@ -1,0 +1,9 @@
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.github.mrgzhen.swagger.SwaggerConfiguration,\
+  com.github.mrgzhen.mybatis.MybatisConfiguration,\
+  com.github.mrgzhen.starter.security.YanyuAuthorizationServerConfiguration,\
+  com.github.mrgzhen.starter.security.YanyuResourceServerConfiguration,\
+  com.github.mrgzhen.starter.security.YanyuSecurityMessageConfiguration,\
+  com.github.mrgzhen.starter.security.YanyuWebMvcConfiguration,\
+  com.github.mrgzhen.starter.core.YanyuErrorMvcAutoConfiguration

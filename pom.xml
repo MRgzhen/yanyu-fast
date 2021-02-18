@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.github.mrgzhen</groupId>
+    <artifactId>yanyu-fast</artifactId>
+    <packaging>pom</packaging>
+    <version>1.1.0</version>
+    <name>yanyu-fast</name>
+    <description>yanyu核心包</description>
+    <url>https://github.com/MRgzhen/yanyu-fast</url>
+
+    <modules>
+        <module>yanyu-core</module>
+        <module>yanyu-swagger</module>
+        <module>yanyu-security</module>
+        <module>yanyu-mybatis</module>
+        <module>yanyu-gateway</module>
+        <module>yanyu-boot</module>
+        <module>yanyu-spring-boot-starter</module>
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>1.8</java.version>
+
+        <spring.security.core.version>5.3.3.RELEASE</spring.security.core.version>
+        <apache.commons.version>4.3</apache.commons.version>
+        <jackson.version>2.11.0</jackson.version>
+        <spring-plugin-core.version>1.2.0.RELEASE</spring-plugin-core.version>
+
+        <mybatis-plus-boot-starter.version>3.4.0</mybatis-plus-boot-starter.version>
+
+        <swagger.version>2.9.2</swagger.version>
+
+        <spring.boot.version>2.3.0.RELEASE</spring.boot.version>
+        <spring.cloud.version>Hoxton.SR5</spring.cloud.version>
+        <spring.cloud.alibaba.version>2.2.1.RELEASE</spring.cloud.alibaba.version>
+        <yanyu.core>1.1.0</yanyu.core>
+    </properties>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>https://github.com/MRgzhen/yanyu-fast.git</connection>
+        <developerConnection>https://github.com/MRgzhen/yanyu-fast.git</developerConnection>
+        <url>https://github.com/MRgzhen/yanyu-fast</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <name>yanyu</name>
+            <email>1175533636@qq.com</email>
+            <roles>
+                <role>Java Development Engineer</role>
+            </roles>
+            <timezone>2020-12-24 00:00:00</timezone>
+        </developer>
+    </developers>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring.cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring.cloud.alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
