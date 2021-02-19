@@ -2,7 +2,6 @@ package com.github.mrgzhen.core.exception.handler;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.github.mrgzhen.core.exception.*;
-import com.github.mrgzhen.core.exception.support.ErrorResult;
 import com.github.mrgzhen.core.web.Result;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,8 +54,8 @@ public class GeneralExceptionHandler {
     @ExceptionHandler(value = {BindException.class, MethodArgumentNotValidException.class})
     public Result handleBindException(Exception e, HttpServletRequest request) {
         log.error("[{}异常：{}]",e.getClass(),e.getMessage(),e);
-        ErrorResult errorResult = errorAttributesResolver.getErrorAttributes(request, e);
-        return Result.fail(new ParamException(), errorResult);
+        String errorResult = errorAttributesResolver.getBindingResultErrorMessage(e);
+        return Result.fail(new ParamException());
     }
 
     /**
@@ -65,7 +64,7 @@ public class GeneralExceptionHandler {
     @ExceptionHandler(GeneralException.class)
     public Result handleGeneralException(GeneralException e, HttpServletRequest request) {
         log.error("[{}异常:{}]",e.getClass(),e.getMessage(),e);
-        ErrorResult errorResult = errorAttributesResolver.getErrorAttributes(request, e);
+        String errorResult = errorAttributesResolver.getBindingResultErrorMessage(e);
         return Result.fail(e, errorResult);
     }
 
@@ -75,7 +74,6 @@ public class GeneralExceptionHandler {
     @ExceptionHandler(Exception.class)
     public Result handleException(Exception e, HttpServletRequest request) {
         log.error("[{}异常:{}]",e.getClass(),e.getMessage(),e);
-        ErrorResult errorResult = errorAttributesResolver.getErrorAttributes(request, e);
-        return Result.fail(new GeneralException("500"), errorResult);
+        return Result.fail(new GeneralException("500"));
     }
 }

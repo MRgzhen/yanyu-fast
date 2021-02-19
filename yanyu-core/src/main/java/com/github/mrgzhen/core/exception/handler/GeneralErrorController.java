@@ -1,13 +1,16 @@
 package com.github.mrgzhen.core.exception.handler;
 
-import com.github.mrgzhen.core.exception.support.ErrorResult;
+import com.github.mrgzhen.core.exception.GeneralException;
+import com.github.mrgzhen.core.util.StringUtil;
 import com.github.mrgzhen.core.web.Result;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.RequestDispatcher;
@@ -29,27 +32,19 @@ public class GeneralErrorController implements ErrorController {
 
     @RequestMapping
     public ResponseEntity<Result> error(HttpServletRequest request) {
-        ErrorResult errorResult = errorAttributesResolver.getErrorAttributes(request);
-        HttpStatus status = getStatus(request);
+        HttpStatus status = errorAttributesResolver.getStatus(request);
         if (status == HttpStatus.NO_CONTENT) {
-            return new ResponseEntity<>(status);
+            return ResponseEntity.ok(Result.fail(new GeneralException(String.valueOf(status.value()))));
         }
-        log.warn("状态码：[{}], 异常明细:[{}]", status.value(), errorAttributesResolver.getAllErrorAttributes(request));
-        return ResponseEntity.status(status).body(Result.fail(String.valueOf(status.value()), errorResult));
+        String errorMsg = errorAttributesResolver.getMessage(request);
+        log.warn("状态码：[{}], 当前请求路径：[{}], 异常明细:[{}]", status.value(), request.getRequestURI(), StringUtils.defaultString(errorMsg, ""));
+        if(StringUtils.isBlank(errorMsg)) {
+            return ResponseEntity.ok(Result.fail(new GeneralException(String.valueOf(status.value()), errorMsg)));
+        } else {
+            return ResponseEntity.ok(Result.fail(new GeneralException(String.valueOf(status.value()))));
+        }
     }
 
-    protected HttpStatus getStatus(HttpServletRequest request) {
-        Integer statusCode = (Integer) request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
-        if (statusCode == null) {
-            return HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-        try {
-            return HttpStatus.valueOf(statusCode);
-        }
-        catch (Exception ex) {
-            return HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-    }
 
     @Override
     public String getErrorPath() {

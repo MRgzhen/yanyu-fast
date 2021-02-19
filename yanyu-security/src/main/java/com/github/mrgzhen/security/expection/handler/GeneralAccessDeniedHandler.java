@@ -3,7 +3,6 @@ package com.github.mrgzhen.security.expection.handler;
 import com.github.mrgzhen.core.exception.AuthenticationException;
 import com.github.mrgzhen.core.exception.PermissionException;
 import com.github.mrgzhen.core.exception.handler.GeneralErrorAttributesResolver;
-import com.github.mrgzhen.core.exception.support.ErrorResult;
 import com.github.mrgzhen.core.web.Result;
 import com.github.mrgzhen.core.util.JSONUtil;
 import lombok.AllArgsConstructor;
@@ -35,8 +34,6 @@ public class GeneralAccessDeniedHandler implements AccessDeniedHandler {
         log.error("请求地址：[{}]，[{}异常：{}]",request.getRequestURI(), accessDeniedException.getClass(),
                 accessDeniedException.getMessage(), accessDeniedException);
         response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
-        ErrorResult errorResult = errorAttributesResolver.getErrorAttributes(request, accessDeniedException);
-        response.getWriter().print(JSONUtil.instant().writeValueAsString(Result.fail(new PermissionException(accessDeniedException.getMessage()), errorResult)));
-//        response.getWriter().print(JSONUtil.instant().writeValueAsString(Result.fail(new PermissionException(), errorResult)));
+        response.getWriter().print(JSONUtil.instant().writeValueAsString(Result.fail(new PermissionException(accessDeniedException.getMessage()))));
     }
 }

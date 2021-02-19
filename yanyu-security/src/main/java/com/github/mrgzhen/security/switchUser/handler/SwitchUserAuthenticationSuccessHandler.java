@@ -84,7 +84,7 @@ public class SwitchUserAuthenticationSuccessHandler implements AuthenticationSuc
             // 响应
             log.warn("请求地址:{}，认证失败：{}",request.getRequestURI(),e.getMessage());
             response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
-            response.getWriter().print(JSONUtil.instant().writeValueAsString(Result.fail(e, errorAttributesResolver.getErrorAttributes(request))));
+            response.getWriter().print(JSONUtil.instant().writeValueAsString(Result.fail(e)));
         }
     }
 }

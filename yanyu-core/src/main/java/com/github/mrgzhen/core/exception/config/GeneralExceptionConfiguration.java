@@ -20,8 +20,8 @@ import org.springframework.context.annotation.PropertySource;
 public class GeneralExceptionConfiguration {
 
     @Bean
-    public GeneralErrorAttributesResolver generalErrorAttributesWrapper(ServerProperties serverProperties) {
-        return new GeneralErrorAttributesResolver(serverProperties.getError());
+    public GeneralErrorAttributesResolver generalErrorAttributesWrapper() {
+        return new GeneralErrorAttributesResolver();
     }
 
     @Bean

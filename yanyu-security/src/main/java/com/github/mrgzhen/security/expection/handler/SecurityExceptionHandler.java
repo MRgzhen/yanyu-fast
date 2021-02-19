@@ -4,7 +4,6 @@ import com.github.mrgzhen.core.exception.AuthenticationException;
 import com.github.mrgzhen.core.exception.PermissionException;
 import com.github.mrgzhen.core.exception.ServiceException;
 import com.github.mrgzhen.core.exception.handler.GeneralErrorAttributesResolver;
-import com.github.mrgzhen.core.exception.support.ErrorResult;
 import com.github.mrgzhen.core.web.Result;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,21 +35,18 @@ public class SecurityExceptionHandler {
     @ExceptionHandler(OAuth2Exception.class)
     public Result handleOAuth2Exception(OAuth2Exception e, HttpServletRequest request) {
         log.error("[{}异常：{}]",e.getClass(), e.getMessage(),e);
-        ErrorResult errorResult = errorAttributesResolver.getErrorAttributes(request, e);
-        return Result.fail(new AuthenticationException(e.getMessage(), e), errorResult);
+        return Result.fail(new AuthenticationException(e.getMessage(), e));
     }
 
     @ExceptionHandler({org.springframework.security.core.AuthenticationException.class})
     public Result handleAuthenticationException(org.springframework.security.core.AuthenticationException e, HttpServletRequest request) {
         log.error("[{}异常：{}]", new Object[]{e.getClass(), e.getMessage(), e});
-        ErrorResult errorResult = this.errorAttributesResolver.getErrorAttributes(request, e);
-        return Result.fail(new AuthenticationException(e.getMessage(), e), errorResult);
+        return Result.fail(new AuthenticationException(e.getMessage(), e));
     }
 
     @ExceptionHandler({AccessException.class})
     public Result handleAccessException(AccessException e, HttpServletRequest request) {
         log.error("[{}异常：{}]", new Object[]{e.getClass(), e.getMessage(), e});
-        ErrorResult errorResult = this.errorAttributesResolver.getErrorAttributes(request, e);
-        return Result.fail(new PermissionException(e), errorResult);
+        return Result.fail(new PermissionException(e));
     }
 }

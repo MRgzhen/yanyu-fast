@@ -1,13 +1,20 @@
 package com.github.mrgzhen.gateway.exception;
 
+import com.github.mrgzhen.core.exception.GeneralException;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.web.ErrorProperties;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
+import org.springframework.boot.web.reactive.error.DefaultErrorAttributes;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.reactive.function.server.ServerRequest;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -19,82 +26,28 @@ import java.util.Map;
 @AllArgsConstructor
 public class GeneralErrorAttributesResolver {
 
-    private final ErrorAttributes errorAttributes;
-    private final ErrorProperties errorProperties;
+    private static final String ERROR_ATTRIBUTE = DefaultErrorAttributes.class.getName() + ".ERROR";
 
-    public Map<String, Object> getErrorAttributes(ServerRequest request) {
-        return this.errorAttributes.getErrorAttributes(request, getErrorAttributeOptions(request));
-    }
-
-    public Map<String, Object> getAllErrorAttributes(ServerRequest request) {
-        return this.errorAttributes.getErrorAttributes(request, true);
-    }
-
-    protected ErrorAttributeOptions getErrorAttributeOptions(ServerRequest request) {
-        ErrorAttributeOptions options = ErrorAttributeOptions.defaults();
-        if (this.errorProperties.isIncludeException()) {
-            options = options.including(ErrorAttributeOptions.Include.EXCEPTION);
+    public String getMessage(ServerRequest request) {
+        Throwable error = getError(request);
+        if (error != null && error instanceof GeneralException) {
+            return error.getMessage();
         }
-        if (isIncludeStackTrace(request,  MediaType.ALL)) {
-            options = options.including(ErrorAttributeOptions.Include.STACK_TRACE);
+        return null;
+    }
+
+    public HttpStatus getStatus(ServerRequest request) {
+        Throwable error = getError(request);
+        if (error instanceof ResponseStatusException) {
+            return ((ResponseStatusException) error).getStatus();
         }
-        if (isIncludeMessage(request,  MediaType.ALL)) {
-            options = options.including(ErrorAttributeOptions.Include.MESSAGE);
-        }
-        if (isIncludeBindingErrors(request,  MediaType.ALL)) {
-            options = options.including(ErrorAttributeOptions.Include.BINDING_ERRORS);
-        }
-        return options;
+        MergedAnnotation<ResponseStatus> responseStatusAnnotation = MergedAnnotations
+                .from(error.getClass(), MergedAnnotations.SearchStrategy.TYPE_HIERARCHY).get(ResponseStatus.class);
+        return responseStatusAnnotation.getValue("code", HttpStatus.class).orElse(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    protected boolean isIncludeStackTrace(ServerRequest request, MediaType produces) {
-        switch (this.errorProperties.getIncludeStacktrace()) {
-            case ALWAYS:
-                return true;
-            case ON_PARAM:
-            case ON_TRACE_PARAM:
-                return isTraceEnabled(request);
-            default:
-                return false;
-        }
-    }
-
-    protected boolean isIncludeMessage(ServerRequest request, MediaType produces) {
-        switch (this.errorProperties.getIncludeMessage()) {
-            case ALWAYS:
-                return true;
-            case ON_PARAM:
-                return isMessageEnabled(request);
-            default:
-                return false;
-        }
-    }
-
-    protected boolean isIncludeBindingErrors(ServerRequest request, MediaType produces) {
-        switch (this.errorProperties.getIncludeBindingErrors()) {
-            case ALWAYS:
-                return true;
-            case ON_PARAM:
-                return isBindingErrorsEnabled(request);
-            default:
-                return false;
-        }
-    }
-
-    protected boolean isTraceEnabled(ServerRequest request) {
-        return getBooleanParameter(request, "trace");
-    }
-
-    protected boolean isMessageEnabled(ServerRequest request) {
-        return getBooleanParameter(request, "message");
-    }
-
-    protected boolean isBindingErrorsEnabled(ServerRequest request) {
-        return getBooleanParameter(request, "errors");
-    }
-
-    private boolean getBooleanParameter(ServerRequest request, String parameterName) {
-        String parameter = request.queryParam(parameterName).orElse("false");
-        return !"false".equalsIgnoreCase(parameter);
+    private Throwable getError(ServerRequest request) {
+        return (Throwable) request.attribute(ERROR_ATTRIBUTE)
+                .orElseThrow(() -> new IllegalStateException("Missing exception attribute in ServerWebExchange"));
     }
 }

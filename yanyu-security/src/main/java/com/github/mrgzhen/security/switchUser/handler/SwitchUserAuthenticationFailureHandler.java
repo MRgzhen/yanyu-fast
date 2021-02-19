@@ -39,11 +39,11 @@ public class SwitchUserAuthenticationFailureHandler implements AuthenticationFai
         if(matcher.requiresSwitchUser(request)) {
             response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
             response.getWriter().print(JSONUtil.instant().writeValueAsString(
-                    Result.fail(new AuthenticationException("用户切换失败"), errorAttributesResolver.getErrorAttributes(request))));
+                    Result.fail(new AuthenticationException("用户切换失败"))));
         } else if(matcher.requiresExitUser(request)){
             response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
             response.getWriter().print(JSONUtil.instant().writeValueAsString(
-                    Result.fail(new AuthenticationException("用户切换失败"), errorAttributesResolver.getErrorAttributes(request))));
+                    Result.fail(new AuthenticationException("用户切换失败"))));
         }
     }
 

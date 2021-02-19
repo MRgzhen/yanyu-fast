@@ -29,8 +29,8 @@ public class GeneralGatewayExceptionConfig {
     private ServerCodecConfigurer serverCodecConfigurer;
 
     @Bean
-    public GeneralErrorAttributesResolver generalErrorAttributesResolver(ErrorAttributes errorAttributes) {
-        return new GeneralErrorAttributesResolver(errorAttributes,this.serverProperties.getError());
+    public GeneralErrorAttributesResolver generalErrorAttributesResolver() {
+        return new GeneralErrorAttributesResolver();
     }
 
     @Bean

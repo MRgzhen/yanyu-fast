@@ -2,8 +2,10 @@ package com.github.mrgzhen.gateway.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mrgzhen.core.exception.GeneralException;
+import com.github.mrgzhen.core.exception.ServiceException;
 import com.github.mrgzhen.core.web.Result;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.web.ErrorProperties;
 import org.springframework.boot.autoconfigure.web.ResourceProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.DefaultErrorWebExceptionHandler;
@@ -11,7 +13,10 @@ import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
@@ -22,32 +27,36 @@ import java.util.Map;
 public class GeneralErrorWebExceptionHandler extends DefaultErrorWebExceptionHandler {
 
     private GeneralErrorAttributesResolver resolver;
-    /**
-     * Create a new {@code DefaultErrorWebExceptionHandler} instance.
-     */
     public GeneralErrorWebExceptionHandler(ErrorAttributes errorAttributes, ResourceProperties resourceProperties,
                                            ErrorProperties errorProperties, ApplicationContext applicationContext,GeneralErrorAttributesResolver resolver) {
         super(errorAttributes, resourceProperties, errorProperties, applicationContext);
         this.resolver = resolver;
     }
 
-    /**
-     * 定义RouterFunctions，任何请求都走renderErrorResponse处理
-     */
     @Override
-    protected RouterFunction<ServerResponse> getRoutingFunction(ErrorAttributes errorAttributes) {
-        return RouterFunctions.route(RequestPredicates.all(),this::renderErrorResponse);
+    protected Mono<ServerResponse> renderErrorResponse(ServerRequest request) {
+        Result error = getResult(request);
+        return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(error));
     }
 
-    @Override
-    protected int getHttpStatus(Map<String, Object> errorAttributes) {
-        return HttpStatus.OK.value();
-    }
-
-    @Override
-    protected Map<String, Object> getErrorAttributes(ServerRequest request, ErrorAttributeOptions options) {
+    protected Result getResult(ServerRequest request) {
         ObjectMapper objectMapper = new ObjectMapper();
-        log.warn("系统异常,{}",resolver.getErrorAttributes(request));
-        return objectMapper.convertValue(Result.fail(new GeneralException("503")),Map.class);
+        String errorMsg = resolver.getMessage(request);
+        HttpStatus httpStatus = resolver.getStatus(request);
+        log.warn("状态码：[{}], 当前请求路径：[{}], 异常明细:[{}]",httpStatus.value(),request.uri(), errorMsg);
+        if(StringUtils.isNoneBlank(errorMsg)) {
+            return Result.fail(new GeneralException(String.valueOf(httpStatus.value()), errorMsg));
+        } else {
+            return Result.fail(new GeneralException(String.valueOf(httpStatus.value())));
+        }
+    }
+
+    protected int getStatus(HttpStatus httpStatus) {
+        if(httpStatus != null) {
+            return  httpStatus.value();
+        } else {
+            return  HttpStatus.INTERNAL_SERVER_ERROR.value();
+        }
     }
 }
